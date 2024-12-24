@@ -1,0 +1,114 @@
+Scopes in pytest Fixtures
+
+There are four built-in scopes for pytest fixtures:
+    1. function (Default Scope)
+    2. class
+    3. module
+    4. session
+
+##########################################################################################################
+
+1. Function Scope
+Description: The fixture is created and destroyed for each individual test function where it is used.
+Use Case: When the fixture setup is lightweight and independent for each test.
+Execution: func_fixture is created separately for test_one and test_two.
+
+import pytest
+
+@pytest.fixture(scope="function")
+def func_fixture():
+    return "I am a function fixture"
+
+def test_one(func_fixture):
+    assert func_fixture == "I am a function fixture"
+
+def test_two(func_fixture):
+    assert func_fixture == "I am a function fixture"
+
+##########################################################################################################
+
+2. Class Scope
+Description: The fixture is created once per test class and is shared among all methods of the class.
+Use Case: When tests in a class share the same setup data or state.
+Execution: class_fixture is created once and shared between test_one and test_two.
+
+import pytest
+
+@pytest.fixture(scope="class")
+def class_fixture():
+    return "I am a class fixture"
+
+class TestExample:
+    def test_one(self, class_fixture):
+        assert class_fixture == "I am a class fixture"
+
+    def test_two(self, class_fixture):
+        assert class_fixture == "I am a class fixture"
+
+##########################################################################################################
+
+3. Module Scope
+Description: The fixture is created once per module and shared across all tests in the module.
+Use Case: When multiple tests in a file require the same setup, and the setup is expensive.
+Execution: module_fixture is created once for the file and shared across test_one and test_two.
+
+import pytest
+
+@pytest.fixture(scope="module")
+def module_fixture():
+    return "I am a module fixture"
+
+def test_one(module_fixture):
+    assert module_fixture == "I am a module fixture"
+
+def test_two(module_fixture):
+    assert module_fixture == "I am a module fixture"
+
+
+##########################################################################################################
+
+4. Session Scope
+Description: The fixture is created once for the entire pytest session and shared across all test files.
+Use Case: When the setup involves global state or resources that are reused across the session (e.g., a database connection, an API client).
+Execution: session_fixture is created once for the pytest session and shared across all tests in all files.
+
+import pytest
+
+@pytest.fixture(scope="session")
+def session_fixture():
+    return "I am a session fixture"
+
+def test_one(session_fixture):
+    assert session_fixture == "I am a session fixture"
+
+def test_two(session_fixture):
+    assert session_fixture == "I am a session fixture"
+
+
+##########################################################################################################
+
+5. Teardown in Fixtures
+You can define teardown logic in a fixture using yield:
+Execution:
+    The code before yield runs during setup.
+    The code after yield runs during teardown.
+
+@pytest.fixture(scope="module")
+def resource():
+    # Setup
+    print("Setup resource")
+
+    yield "resource_data"
+
+    # Teardown
+    print("Teardown resource")
+
+def test_example(resource):
+    assert resource == "resource_data"
+
+##########################################################################################################
+
+Best Practices
+1. Use function scope for most fixtures unless you need sharing across tests.
+2. Opt for broader scopes like module or session only when the setup is expensive or resources are shared.
+3. Ensure fixtures with broader scopes are thread-safe if running tests in parallel (e.g., with pytest-xdist).

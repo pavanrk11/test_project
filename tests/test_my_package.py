@@ -3,11 +3,19 @@ import pytest
 
 from my_package.module import add, subtract, multiply, divide
 
+@pytest.fixture(scope="module")
+def resource():
+    # Setup
+    print("Setup resource")
+    yield "resource_data"
+    # Teardown
+    print("Teardown resource")
 
-def test_tests1():
+
+def test_tests1(resource):
 
     # add
-    assert add(3, 5) == 8
+    assert add(3, 3) == 8
     assert add(-1, 1) == 0
     assert add(0, 0) == 0
 
